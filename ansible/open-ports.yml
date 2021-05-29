@@ -1,0 +1,32 @@
+- name: Open ports
+  hosts: servers
+  become: yes
+  become_user: root
+  tasks:
+    - name: Open ports
+      firewalld:
+        permanent: yes
+        port: 7000/tcp
+        state: enabled
+        zone: public
+    - name: Open ports csql
+      firewalld:
+        permanent: yes
+        port: 9042/tcp
+        state: enabled
+        zone: public
+        immediate: yes
+    - name: Open ports JMX
+      firewalld:
+        permanent: yes
+        port: 7199/tcp
+        state: enabled
+        zone: public
+        immediate: yes
+    - name: Open ports Thrift (Cassandra)
+      firewalld:
+        permanent: yes
+        port: 9160/tcp
+        state: enabled
+        zone: public
+        immediate: yes

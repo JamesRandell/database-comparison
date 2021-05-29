@@ -1,0 +1,57 @@
+docker run -e DS_LICENSE=accept --name my-studio -p 9091:9091 -d datastax/dse-studio
+
+
+docker run -e DS_LICENSE=accept --link my-dse --name my-studio -p 9091:9091 -d datastax/dse-studio
+
+
+
+
+docker run -e DS_LICENSE=accept -d -p 8888:8888 -p 61620:61620 --name my-opscenter datastax/dse-opscenter:6.5.2
+
+# zookeeper
+docker run -d \
+--net=host \
+--name=zookeeper \
+-e ZOOKEEPER_CLIENT_PORT=32181 \
+-e ZOOKEEPER_TICK_TIME=2000 \
+-e ZOOKEEPER_SYNC_LIMIT=2 \
+confluentinc/cp-zookeeper:latest
+
+
+# kafka
+docker run -d \
+    --net=host \
+    --name=kafka \
+    -e KAFKA_ZOOKEEPER_CONNECT=localhost:32181 \
+    -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:29092 \
+    -e KAFKA_BROKER_ID=2 \
+    -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+    confluentinc/cp-kafka:latest
+
+#kafka rest
+
+docker run -d \
+-e KAFKA_REST_BOOTSTRAP_SERVERS=localhost:29092 \
+confluentinc/cp-kafka:latest
+
+# kafka ui
+docker run -d \
+-e "KAFKA_REST_PROXY_URL=PLAINTEXT://localhost:29092" \
+confluentinc/cp-kafka-rest:latest
+
+# lenses (confluent manager but free)
+sudo docker pull lensesio/box:latest
+
+docker run -e ADV_HOST=127.0.0.1 \
+-e EULA="https://licenses.lenses.io/d/?id=9b7f55e8-b7d3-11eb-9025-42010af01003" \
+--rm -p 3030:3030 -p 9092:9092 lensesio/box:latest
+
+Setting advertised host to 127.0.0.1.
+Starting services.
+This is Lenses.io's Box. Lenses 4.2.3, Kafka 2.6.2-L0 (Lenses.io's Kafka Distribution).
+You may visit http://127.0.0.1:3030 in about a minute. Login with admin/admin. The services need some time to start up.
+The broker is accessible at PLAINTEXT://127.0.0.1:9092, Schema Registry at http://127.0.0.1:8081 and Zookeeper at 127.0.0.1:2181.
+For documentation please refer to -> https://docs.lenses.io/dev/lenses-box/
+If you have trouble running the image or want to give us feedback (or a rant), come chat with us at https://launchpass.com/lensesio
+You can view the logs for all running services at http://127.0.0.1:3030/fdd/logs
+2021-05-18 12:35:34,085 INFO Included extra file "/etc/supervisord.d/00-delayed-messag

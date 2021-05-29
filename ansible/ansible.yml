@@ -1,0 +1,12 @@
+ - name: Webserver
+   hosts: localhost
+   connection: local
+   gather_facts: no
+   tasks:
+    - name: Pull Cassandra Docker Image
+      docker_image:
+       name: cassandra
+       tag: "4.0" 
+       state: present
+       source: pull
+    

@@ -1,0 +1,70 @@
+- name: Playbook
+  hosts: servers
+  become: yes
+  become_user: root
+  tasks:
+    - name: Update CASSANDRA config
+      lineinfile:
+        path: /etc/cassandra/conf/cassandra.yaml
+        regexp: "{{ item.from }}"
+        line: "{{ item.to }}"
+        backup: yes
+      with_items:
+        #- { from: 'cluster\_name', to: "cluster_name: 'work'" }
+        - { from: 'listen_address:', to: "listen_address: {{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}" }
+        - { from: '- seeds:', to: "       - seeds: \"{{ hostvars[groups['servers'][0]].ansible_host }}\"" }
+        - { from: 'start_rpc:', to: 'start_rpc: true' }
+        
+        # allow JMX to connect
+        #- { from: 'rpc_address:', to: "rpc_address: {{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}" }
+        - { from: 'rpc_address:', to: "#rpc_address: {{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}" }
+      become: yes
+      become_user: root
+    - name: Update CASSANDRA env
+      lineinfile:
+        path: /etc/cassandra/conf/cassandra-env.sh
+        regexp: "{{ item.from }}"
+        line: "{{ item.to }}"
+        backup: yes
+      with_items:
+        - { from: '#MAX_HEAP_SIZE=', to: 'MAX_HEAP_SIZE="2G"' }
+        - { from: '#HEAP_NEWSIZE=', to: 'HEAP_NEWSIZE="400M"' }
+        - { from: '    #LOCAL_JMX=yes', to: '    LOCAL_JMX=no' }
+      become: yes
+      become_user: root
+    - name: Copy authentication file over
+      copy:
+        src: ../template/cassandra/jmxremote.password
+        dest: /etc/cassandra/jmxremote.password
+        owner: cassandra
+        group: cassandra
+    #- name: Clear out old cluster data as we're changing the name
+    #  file:
+    #    path: /var/lib/cassandra/data
+    #    state: absent
+    #- name: Re-create data directory as user
+    #  file:
+    #    path: /var/lib/cassandra/data
+    #    state: directory
+    #    owner: cassandra
+    #    group: cassandra
+    - name: Open ports
+      firewalld:
+        port: "{{ item }}"
+        permanent: yes
+        state: enabled
+        zone: public
+        immediate: yes
+      loop:
+        - 7000/tcp
+        - 9042/tcp
+        - 7199/tcp
+        #- 9160/tcp
+    - name: restart CASSANDRA
+      systemd:
+        name: cassandra
+        state: restarted
+    - name: Make sure cassandra is started
+      systemd:
+        name: cassandra.service
+        state: started

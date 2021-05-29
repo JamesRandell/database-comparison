@@ -1,0 +1,69 @@
+- name: Playbook
+  hosts: servers
+  become: yes
+  become_user: root
+  tasks:
+    - name: Update YUM
+      yum: update_cache=yes
+    - name: Install Java JDK
+      yum:
+        name: java-11-openjdk.x86_64
+        state: present
+    - name: Create service account
+      user:
+        name: 'X28-SVC-CASSANDRA'
+        password: ''
+        shell: /bin/bash
+        state: present
+      become: true
+    - name: Remove old JAVA paths from bash_profile
+      lineinfile:
+        path: ~/.bash_profile
+        regexp: "{{ item.to }}"
+        state: absent
+      with_items:
+        - { to: 'export JAVA_HOME=' }
+        - { to: 'export JRE_HOME=' }
+      become: yes
+      become_user: X28-SVC-CASSANDRA
+    - name: Adding the java path in the bashrc files
+      lineinfile:
+        path: ~/.bash_profile
+        line: "{{ item.to }}"
+        insertafter: EOF
+        state: present
+      with_items:
+        - { to: 'export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.11.0.9-3.e18.x86_64' }
+        - { to: 'export JRE_HOME=/usr/lib/jvm/jre' }
+      become: yes
+      become_user: X28-SVC-CASSANDRA
+    - name: Source the bash_profile files
+      shell: source ~/.bash_profile
+      become: yes
+      become_user: X28-SVC-CASSANDRA
+    - name: Update YUM
+      copy:
+        src: ../template/cassandra/template-yum-repo.txt
+        dest: /etc/yum.repos.d/cassandra.repo
+    - name: Download CASSANDRA and things
+      yum: 
+        name:
+          - cassandra
+          - python27
+        state: present
+    - name: Reload systemctl
+      systemd:
+        daemon_reload: yes
+    - name: Switch of iptables
+      yum:
+        name: iptables
+        state: absent
+    - name: Install firewalld
+      dnf:
+        name: firewalld
+        state: present
+    - name: Start firewalld
+      systemd:
+        name: firewalld
+        state: started
+

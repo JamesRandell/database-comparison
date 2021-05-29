@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "ansible"
+		},
+		{
+			"path": "powershell"
+		},
+		{
+			"path": "template"
+		},
+		{
+			"path": "docker"
+		},
+		{
+			"name": "Database Comparison",
+			"path": "."
+		}
+	]
+}
