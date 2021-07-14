@@ -6,5 +6,8 @@
 "CentOS 4" ansible_host=192.168.1.9 ansible_ssh_extra_args='-o StrictHostKeyChecking=no' ansible_user=root ansible_password=james
 "CentOS 5" ansible_host=192.168.1.7 ansible_ssh_extra_args='-o StrictHostKeyChecking=no' ansible_user=root ansible_password=james
 
+[local]
+"Localhost" ansible_host=127.0.0.1 ansible_ssh_extra_args='-o StrictHostKeyChecking=no'
 
-
+[localhost]
+"Localhost" ansible_host=127.0.0.1 ansible_ssh_extra_args='-o StrictHostKeyChecking=no'

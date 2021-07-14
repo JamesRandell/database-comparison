@@ -15,6 +15,9 @@
 		{
 			"name": "Database Comparison",
 			"path": "."
+		},
+		{
+			"path": "playground"
 		}
 	]
 }

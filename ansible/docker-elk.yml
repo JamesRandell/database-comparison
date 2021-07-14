@@ -1,0 +1,103 @@
+- name: ELK stack baby!
+  hosts: localhost
+  vars_files:
+    - inventory/group_vars/elk.yml
+  tasks:
+    - name: Update sysctl for elastic to run
+      sysctl:
+        name: vm.max_map_count
+        value: "262144"
+        state: present
+    - name: Pull Elastic
+      docker_image:
+        name: "{{ docker_elastic_repo }}{{ docker_elastic_image }}:{{ docker_elastic_version }}"
+        state: present
+        source: pull
+    - name: Create an ES network
+      docker_network:
+        name: "{{ network_name }}"
+        state: present
+    - name: Create elastic search volumne
+      docker_volume:
+        name: esdata
+        driver: local
+        state: present
+    - name: Start Elastic
+      docker_container:
+        name: "ElasticSearch{{ item }}"
+        image: "{{ docker_elastic_repo }}{{ docker_elastic_image }}:{{ docker_elastic_version }}"
+        state: started
+        env:
+          node.name: "elasticsearch{{ item }}"
+          cluster.name: es-docker-cluster
+          cluster.initial_master_nodes: elasticsearch1
+          #discovery.type: "single-node"
+          discovery.seed_hosts: elasticsearch1
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+          xpack.security.enabled: "{{ security_xpack }}"
+          xpack.monitoring.collection.enabled: "true"
+        ulimits:
+        - nofile:65535:65535
+        networks:
+        - name: "{{ network_name }}"
+        ports:
+        - "920{{ item }}:9200"
+        log_driver: "{{ log_driver }}"
+        log_options:
+          max-size: "{{ log_max_size }}"
+          max-file: "{{ log_max_file }}"
+      with_sequence: count=3
+    - name: Pull Filebeat
+      docker_image:
+        name: "{{ docker_filebeat_repo }}{{ docker_filebeat_image }}:{{ docker_filebeat_version }}"
+        state: present
+        source: pull
+    - name: Start Filebeat
+      docker_container:
+        name: Filebeat
+        image: "{{ docker_filebeat_repo }}{{ docker_filebeat_image }}:{{ docker_filebeat_version }}"
+        state: started
+        env:
+          setup.kibana.host: "{{ server_name }}:5601" 
+          output.elasticsearch.hosts: "http://{{ ansible_default_ipv4.address }}:9201/"
+        networks:
+        - name: "{{ network_name }}"
+    - name: Pull Metricbeat
+      docker_image:
+        name: "{{ docker_metricbeat_repo }}{{ docker_metricbeat_image }}:{{ docker_metricbeat_version }}"
+        state: present
+        source: pull
+    - name: Start Metricbeat
+      docker_container:
+        name: Metricbeat
+        image: "{{ docker_metricbeat_repo }}{{ docker_metricbeat_image }}:{{ docker_metricbeat_version }}"
+        state: started
+        env:
+          setup.kibana.host: "{{ server_name }}:5601" 
+          output.elasticsearch.hosts: "http://{{ ansible_default_ipv4.address }}:9201/"
+        networks:
+        - name: "{{ network_name }}"
+    - name: Pull Kibana
+      docker_image:
+        name: "{{ docker_elastic_repo }}{{ docker_kibana_image }}:{{ docker_kibana_version }}"
+        state: present
+        source: pull
+    - name: Start Kibana
+      docker_container:
+        name: Kibana
+        image: "{{ docker_kibana_repo }}{{ docker_kibana_image }}:{{ docker_kibana_version }}"
+        state: started
+        env:
+          servername: "{{ server_name }}"
+          ELASTICSEARCH_HOSTS: "http://{{ ansible_default_ipv4.address }}:9201/"
+          ELASTICSEARCH_USERNAME: "kibana"
+          ELASTICSEARCH_PASWORD: "{{ kibana_password }}"
+          xpack.security.enabled: "{{ security_xpack }}"
+        networks:
+        - name: "{{ network_name }}"
+        ports:
+        - "5601:5601"
+        log_driver: "{{ log_driver }}"
+        log_options:
+          max-size: "{{ log_max_size }}"
+          max-file: "{{ log_max_file }}"

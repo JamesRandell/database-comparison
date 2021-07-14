@@ -1,0 +1,14 @@
+- name: Kafka related build (jaegertracing monitoring for kafka)
+  hosts: localhost
+
+  tasks:
+    - name: Pull Jaeger Tracing
+      docker_image:
+        name: jaegertracing/all-in-one
+        state: present
+        source: pull
+    - name: Start Jaeger
+      docker_container:
+        name: Jaeger
+        image: jaegertracing/all-in-one
+        state: started

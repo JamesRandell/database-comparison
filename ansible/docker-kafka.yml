@@ -1,0 +1,14 @@
+- name: Kafka related build
+  hosts: localhost
+
+  tasks:
+    - name: Pull Lenses
+      docker_image:
+        name: lensesio/lenses
+        state: present
+        source: pull
+    - name: Start Lenses
+      docker_container:
+        name: Lenses
+        image: lensesio/lenses
+        state: started

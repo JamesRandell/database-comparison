@@ -1,0 +1,26 @@
+---
+# Docker paths
+docker_elastic_repo: docker.elastic.co/
+docker_elastic_image: elasticsearch/elasticsearch
+docker_elastic_version: 7.13.3
+docker_kibana_repo: docker.elastic.co/
+docker_kibana_image: kibana/kibana
+docker_kibana_version: 7.13.3
+docker_filebeat_repo: docker.elastic.co/
+docker_filebeat_image: beats/filebeat
+docker_filebeat_version: 7.13.3
+docker_metricbeat_repo: docker.elastic.co/
+docker_metricbeat_image: beats/filebeat
+docker_metricbeat_version: 7.13.3
+
+network_name: elk
+
+log_driver: "json-file"
+log_max_size: "10m" 
+log_max_file: "3"
+
+
+server_name: localhost
+kibana_password: password1
+
+security_xpack: "false"
