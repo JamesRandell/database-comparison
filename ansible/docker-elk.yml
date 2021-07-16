@@ -2,6 +2,7 @@
   hosts: localhost
   vars_files:
     - inventory/group_vars/elk.yml
+    - inventory/group_vars/shared.yml
   tasks:
     - name: Update sysctl for elastic to run
       sysctl:
@@ -15,7 +16,7 @@
         source: pull
     - name: Create an ES network
       docker_network:
-        name: "{{ network_name }}"
+        name: "{{ network_elk }}"
         state: present
     - name: Create elastic search volumne
       docker_volume:
@@ -39,7 +40,7 @@
         ulimits:
         - nofile:65535:65535
         networks:
-        - name: "{{ network_name }}"
+        - name: "{{ network_elk }}"
         ports:
         - "920{{ item }}:9200"
         log_driver: "{{ log_driver }}"
@@ -61,7 +62,7 @@
           setup.kibana.host: "{{ server_name }}:5601" 
           output.elasticsearch.hosts: "http://{{ ansible_default_ipv4.address }}:9201/"
         networks:
-        - name: "{{ network_name }}"
+        - name: "{{ network_elk }}"
     - name: Pull Metricbeat
       docker_image:
         name: "{{ docker_metricbeat_repo }}{{ docker_metricbeat_image }}:{{ docker_metricbeat_version }}"
@@ -76,7 +77,7 @@
           setup.kibana.host: "{{ server_name }}:5601" 
           output.elasticsearch.hosts: "http://{{ ansible_default_ipv4.address }}:9201/"
         networks:
-        - name: "{{ network_name }}"
+        - name: "{{ network_elk }}"
     - name: Pull Kibana
       docker_image:
         name: "{{ docker_elastic_repo }}{{ docker_kibana_image }}:{{ docker_kibana_version }}"
@@ -94,7 +95,7 @@
           ELASTICSEARCH_PASWORD: "{{ kibana_password }}"
           xpack.security.enabled: "{{ security_xpack }}"
         networks:
-        - name: "{{ network_name }}"
+        - name: "{{ network_elk }}"
         ports:
         - "5601:5601"
         log_driver: "{{ log_driver }}"

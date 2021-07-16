@@ -13,7 +13,7 @@ docker_metricbeat_repo: docker.elastic.co/
 docker_metricbeat_image: beats/filebeat
 docker_metricbeat_version: 7.13.3
 
-network_name: elk
+
 
 log_driver: "json-file"
 log_max_size: "10m" 

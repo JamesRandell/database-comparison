@@ -1,14 +1,80 @@
-- name: Kafka related build
+- name: Kafka build
   hosts: localhost
-
+  vars_files:
+    - inventory/group_vars/shared.yml
   tasks:
-    - name: Pull Lenses
+    - name: Create the Kafka network
+      docker_network:
+        name: "{{ network_kafka }}"
+        state: present
+    - name: Pull Zookeeper
       docker_image:
-        name: lensesio/lenses
+        #name: confluentinc/cp-zookeeper:latest
+        name: bitnami/zookeeper:latest
         state: present
         source: pull
-    - name: Start Lenses
+    - name: Start Zookeeper
       docker_container:
-        name: Lenses
-        image: lensesio/lenses
+        name: Zookeeper{{ item }}
+        image: bitnami/zookeeper:latest
         state: started
+        env:
+          ALLOW_ANONYMOUS_LOGIN: "yes"
+          #ZOOKEEPER_CLIENT_PORT: "2{{ item }}181"
+          #ZOOKEEPER_CLIENT_PORT_ADDRESS: "127.0.0.1"
+          #ZOOKEEPER_TICK_TIME: "2000"
+          #ZOOKEEPER_SYNC_LIMIT: "2"
+          #ZOOKEEPER_SERVER_ID: "{{ item }}"
+          #ZOO_PORT_NUMBER: "2{{ item }}181" #client port
+          ZOO_SERVER_ID: "{{ item }}"
+          ZOO_TICK_TIME: "2000"
+          ZOO_SYNC_LIMIT: "2"
+          ZOO_SERVERS: "Zookeeper1:2888:3888,Zookeeper2:2888:3888,Zookeeper3:2888:3888"
+        networks:
+        - name: "{{ network_kafka }}"
+        ports:
+        - "2{{ item }}181:2181"
+        - "2{{ item }}888:2888"
+        - "3{{ item }}888:3888"
+        - "1{{ item }}080:8080"
+      with_sequence: count=3
+    - name: Pull Kafka
+      docker_image:
+        #name: confluentinc/cp-kafka:latest
+        name: bitnami/kafka:latest
+        state: present
+        source: pull
+    - name: Start Kafka
+      docker_container:
+        name: Kafka{{ item }}
+        image: bitnami/kafka:latest
+        state: started
+        env:
+          ALLOW_PLAINTEXT_LISTENER: "yes"
+          KAFKA_ZOOKEEPER_CONNECT: "Zookeeper1:2181,Zookeeper2:2181,Zookeeper3:2181"
+          KAFKA_LISTENERS: "PLAINTEXT://Kafka{{ item }}:9092,OUTSIDE://localhost:9094"
+          KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://Kafka{{ item }}:9092,OUTSIDE://localhost:{{ item }}9094"
+          KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+          #{{ ansible_default_ipv4.address }}
+          KAFKA_ZOOKEEPER_PROTOCOL: "PLAINTEXT"
+          #KAFKA_ADVERTISED_HOST_NAME: "{{ ansible_default_ipv4.address }}"
+          ##KAFKA_ZOOKEEPER_CONNECT: "host01:2181,host02:2181,host03:2181"
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,OUTSIDE:PLAINTEXT"
+          #KAFKA_LISTENERS: "PLAINTEXT://kafka:{{ item }}9092,BROKER://kafka:9092"
+          #KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:{{ item }}9092,BROKER://localhost:9092"
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+          KAFKA_CREATE_TOPICS: "testtopic:1:1"
+          KAFKA_BROKER_ID: "{{ item }}"
+          KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote \
+            -Dcom.sun.management.jmxremote.authenticate=false \
+            -Dcom.sun.management.jmxremote.ssl=false \
+            -Djava.rmi.server.hostname={{ ansible_hostname }} \
+            -Dcom.sun.management.jmxremote.rmi.port=9099"
+          JMX_PORT: "9099"
+        networks:
+        - name: "{{ network_kafka }}"
+        ports:
+        - "{{ item }}9092:9092"
+        - "{{ item }}9094:{{ item }}9094"
+        - "9{{ item }}99:9099"
+      with_sequence: count=3
