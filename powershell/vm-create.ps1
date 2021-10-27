@@ -10,7 +10,7 @@ $buildFromISO = 0;
 $vmBaseImage = "C:\Users\Public\Documents\Hyper-V\VM images\CentOS-fresh.vhdx"
 $vmName = "CentOS" # name of VM, this just applies in Windows, it isn't applied to the OS guest itself.
 $image = "C:\Users\Public\Documents\Hyper-V\VM images\CentOS-Stream-8-x86_64-20210506-boot.iso"
-$vmswitch = "Minishift" # name of your local vswitch
+$vmswitch = "lab" # name of your local vswitch
 $port = "Network Adapter" # port on the VM
 $cpu =  2 # Number of CPUs
 $ram = 4GB # RAM of VM. Note this is not a string, not in quotation marks
@@ -23,25 +23,8 @@ $startVM = 1
 # how many Vms to build
 $numberOfVM = 5
 
-For ($i = 1; $i -le $numberOfVM; $i++) {
 
-    $vmNameTemp = $vmname + " " + $i;
 
-    $temp = checkForVM($vmNameTemp);
-    If ($temp -eq 0) {
-        buildVM($vmNameTemp);
-        
-    } else {
-        if ($replaceVM -eq 1) {
-            removeVM($vmNameTemp);
-            buildVM($vmNameTemp);
-        }
-    }
-
-    If ($startVM -eq 1) {
-        startVM($vmNameTemp);
-    }
-}
 
 
 
@@ -119,4 +102,30 @@ function removeVM {
 
     Remove-VM -Name $vmName -Force
     Write-Output "VM: '$vmname' removed"
+}
+
+
+
+
+
+
+
+For ($i = 1; $i -le $numberOfVM; $i++) {
+
+    $vmNameTemp = $vmname + " " + $i;
+
+    $temp = checkForVM($vmNameTemp);
+    If ($temp -eq 0) {
+        buildVM($vmNameTemp);
+        
+    } else {
+        if ($replaceVM -eq 1) {
+            removeVM($vmNameTemp);
+            buildVM($vmNameTemp);
+        }
+    }
+
+    If ($startVM -eq 1) {
+        startVM($vmNameTemp);
+    }
 }

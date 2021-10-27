@@ -1,0 +1,15 @@
+For a cassandra build in a VM, you will need to first use WSL, then run the following:
+
+
+
+cd "/mnt/c/Users/James/Code/Database Comparison/ansible"
+
+# this playbook will take a bit of time. It sets up the VM's and installed all sorts of software from YUM and updates everything
+ansible-playbook build-vm.yml -i inventory/inventory.yml
+
+# this one will configure cassandra, so more of an application/service level update
+ansible-playbook build-cassandra.yml -i inventory/inventory.yml
+
+# finally, this is cassandra specific, but we open ports
+# YOU DON'T NEED THIS: I stuffed this into build-cassandra
+# ansible-playbook open-ports.yml -i inventory/inventory.yml

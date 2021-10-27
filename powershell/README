@@ -1,0 +1,14 @@
+You'll first need to create a new virtual network switch.
+I created an External swtich named "lab" before doing the below steps. If you call it something else make
+sure you update the $vmswitch parameter in vm-create
+
+Make sure you're in a powershell terminal, then run the following to re-build the VMs
+
+cd "C:\Users\james\Code\Database Comparison\powershell"
+
+.\vm-create.ps1
+
+# when done:
+# this populates the ansible playbook with our created VMs
+# it'll take a few seconds after you run vm-create for all the VMs to start up, so re-run get-hosts if some of the entries are missing
+.\get-hosts.ps1
