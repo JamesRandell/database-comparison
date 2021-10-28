@@ -69,7 +69,10 @@ function buildVM {
     Remove-VMNetworkAdapter -VMName $vmName
     Add-VMNetworkAdapter -VMName $vmName -Name $port
     #Set-VMNetworkAdapterVlan -VMName $vmName -VMNetworkAdapterName $port -Access -AccessVlanId $vlan
+    
     Connect-VMNetworkAdapter -VMName $vmName -Name $port -SwitchName $vmswitch
+    Set-VMNetworkAdapter -VMName $vmName -MaximumBandwidth 1000000
+
     
     
     
