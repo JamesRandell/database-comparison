@@ -27,8 +27,8 @@
         line: "{{ item.to }}"
         backup: yes
       with_items:
-        - { from: '#MAX_HEAP_SIZE=', to: 'MAX_HEAP_SIZE="2G"' }
-        - { from: '#HEAP_NEWSIZE=', to: 'HEAP_NEWSIZE="400M"' }
+        - { from: '#MAX_HEAP_SIZE=', to: 'MAX_HEAP_SIZE="1.5"' }
+        - { from: '#HEAP_NEWSIZE=', to: 'HEAP_NEWSIZE="300M"' }
         - { from: '    #LOCAL_JMX=yes', to: '    LOCAL_JMX=no' }
       become: yes
       become_user: root
