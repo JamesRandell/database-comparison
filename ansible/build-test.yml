@@ -1,0 +1,8 @@
+- name: Playbook
+  hosts: localhost
+  #become: yes
+  #become_user: root
+  tasks:
+    - name: Build VMs (powershell)
+      #ansible.windows.win_shell: C:\Users\james\Code\Database Comparison\powershell\get-hosts.ps1 >> C:\Users\james\Code\Database Comparison\powershell\output.txt
+      ansible.windows.win_command: powershell.exe -ExecutionPolicy ByPass -File C:\Users\james\Code\Database Comparison\powershell\get-hosts.ps1 >> C:\Users\james\Code\Database Comparison\powershell\output.txt

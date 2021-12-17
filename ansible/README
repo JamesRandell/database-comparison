@@ -1,5 +1,40 @@
 For a cassandra build in a VM, you will need to first use WSL, then run the following:
 
+# configure pip to use pip 3. Can do this for python too
+# By default, 'python' points to 2.7, so lets change it to 3.6 (or higher)
+alias pip=pip3
+alias python=python3.8
+
+# For the very first use of Ansible, or to upgrade it I had to jump through the following hoops:
+# This was done in WSL
+
+# On my WSL install, Ansible was installed via apt and not PIP, if you try to remove or upgrade ansible with pip you'll get the following error:
+# "Not uninstalling ansible at /usr/lib/python2.7/dist-packages, outside environment /usr"
+# So, uninstall it via apt instead:
+sudo apt purge ansible
+sudo apt -y update
+
+# if you need to reset the command link cache:
+hash -d ansible
+
+sudo apt install ansible
+
+
+# IF we need to re-install python and pip, then this section is for you
+# I've noticed pip complains that running it direct will 
+# be depracated, so you can run it with python
+# this next line is from https://pip.pypa.io/en/stable/installation/
+python -m pip install --upgrade pip
+
+### Some back storey ###
+# I was going to use pip to install ansible wit hthe following command: "python -m pip install ansible"
+# However, whilst this installed ansible, i couldn't get things like "ansible-playbook" or "ansible-galaxy" to work.
+# it complained about "-bin: /usr/bin/ansible-playbook No file..." so in the end I gave up and went with 
+# apt as documented above
+
+# for first time use, get some additional modules from galaxy hub
+ansible-galaxy collection install ansible.windows
+# ansible-galaxy install -r requirements.yml
 
 
 cd "/mnt/c/Users/James/Code/Database Comparison/ansible"
