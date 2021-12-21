@@ -33,6 +33,8 @@ python -m pip install --upgrade pip
 # apt as documented above
 
 # for first time use, get some additional modules from galaxy hub
+# note we don't actually need this. I was playing around with running powershell
+# from Ansible and this is the module to do it (ansible.windows in requirements)
 ansible-galaxy collection install -r requirements.yml --force
 
 
@@ -47,3 +49,8 @@ ansible-playbook build-cassandra.yml -i inventory/inventory.yml
 # finally, this is cassandra specific, but we open ports
 # YOU DON'T NEED THIS: I stuffed this into build-cassandra
 # ansible-playbook open-ports.yml -i inventory/inventory.yml
+
+
+# VM access is
+username: root
+password: james

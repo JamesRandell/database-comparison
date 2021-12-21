@@ -1,2 +1,4 @@
 collections:
 - name: ansible.windows
+#- name: oasis_roles.system
+- name: ansible.posix # used fore firewalld on this version of ansible

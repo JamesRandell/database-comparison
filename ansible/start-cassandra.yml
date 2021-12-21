@@ -5,5 +5,5 @@
   tasks:
     - name: Make sure cassandra is started
       systemd:
-        name: cassandra.service
+        name: cassandra
         state: started

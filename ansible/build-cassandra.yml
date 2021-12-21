@@ -22,14 +22,33 @@
       become_user: root
     - name: Update CASSANDRA env
       lineinfile:
-        path: /etc/cassandra/conf/cassandra-env.sh
-        regexp: "{{ item.from }}"
-        line: "{{ item.to }}"
+        #path: /etc/cassandra/conf/cassandra-env.sh
+        dest: /etc/cassandra/conf/cassandra-env.sh
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        #regexp: "{{ item.from }}"
+        #line: "{{ item.to }}"
+        #regexp: "{{ item.property | regex_escape() }}="
+        #line: "{{ item.property }}={{ item.value }}"
         backup: yes
       with_items:
-        - { from: '#MAX_HEAP_SIZE=', to: 'MAX_HEAP_SIZE="1.5"' }
-        - { from: '#HEAP_NEWSIZE=', to: 'HEAP_NEWSIZE="300M"' }
-        - { from: '    #LOCAL_JMX=yes', to: '    LOCAL_JMX=no' }
+        #- { from: 'MAX_HEAP_SIZE=', to: 'MAX_HEAP_SIZE="1500M"' }
+        #- { from: 'HEAP_NEWSIZE=', to: 'HEAP_NEWSIZE="300M"' }
+        - { regexp: '#MAX_HEAP_SIZE', line: 'MAX_HEAP_SIZE="1200M"' }
+        - { regexp: 'HEAP_NEWSIZE"300M"', line: 'HEAP_NEWSIZE="300M"' }
+        - { regexp: 'LOCAL_JMX=yes', line: 'LOCAL_JMX=no' }
+        #- { from: '    #LOCAL_JMX=yes', to: '    LOCAL_JMX=no' }
+      become: yes
+      become_user: root
+    - name: Update CASSANDRA env (part 2)
+      lineinfile:
+        path: /etc/cassandra/conf/cassandra-env.sh
+        regexp: "^#? *{{ item.key | regex_escape() }}="
+        line: "{{ item.key }}={{ item.value }}"
+        backup: yes
+      with_dict:
+        'MAX_HEAP_SIZE': '"800M"'
+        'HEAP_NEWSIZE': '"200M"'
       become: yes
       become_user: root
     - name: Copy authentication file over
@@ -48,6 +67,11 @@
     #    state: directory
     #    owner: cassandra
     #    group: cassandra
+    - name: Enable firewalld
+      service:
+        name: firewalld
+        enabled: yes
+        state: started
     - name: Open ports
       firewalld:
         port: "{{ item }}"
