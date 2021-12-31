@@ -26,6 +26,10 @@ sudo apt install ansible
 # this next line is from https://pip.pypa.io/en/stable/installation/
 python -m pip install --upgrade pip
 
+
+# in WSL, run this to get the right version of docker
+pip install docker
+
 ### Some back storey ###
 # I was going to use pip to install ansible wit hthe following command: "python -m pip install ansible"
 # However, whilst this installed ansible, i couldn't get things like "ansible-playbook" or "ansible-galaxy" to work.

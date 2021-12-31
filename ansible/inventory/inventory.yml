@@ -6,5 +6,3 @@
 "CentOS 4" ansible_host=192.168.1.55 ansible_ssh_extra_args='-o StrictHostKeyChecking=no' ansible_user=root ansible_password=james
 "CentOS 5" ansible_host=192.168.1.56 ansible_ssh_extra_args='-o StrictHostKeyChecking=no' ansible_user=root ansible_password=james
 
-
-

@@ -3,6 +3,16 @@
   vars_files:
     - inventory/group_vars/shared.yml
   tasks:
+    - community.docker.docker_compose:
+        docker_host: localhost:2375
+        project_src: flask
+        scale:
+          web: 2
+      register: output
+    - name: Install Docker Module for Python
+      pip:
+        name: docker
+        state: present
     - name: Create the Kafka network
       docker_network:
         name: "{{ network_kafka }}"
@@ -13,6 +23,7 @@
         name: bitnami/zookeeper:latest
         state: present
         source: pull
+        ansible_python_interpreter: /usr/bin/python
     - name: Start Zookeeper
       docker_container:
         name: Zookeeper{{ item }}

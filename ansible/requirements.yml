@@ -1,4 +1,8 @@
 collections:
+# this wont work on WSL, so not really sure why I'm installing it. 
+# Actually i lie the collection doesd work, but the powershell bit doesn't
 - name: ansible.windows
 #- name: oasis_roles.system
 - name: ansible.posix # used fore firewalld on this version of ansible
+# install a collection the contains docker_network
+- name: community.docker
