@@ -2,13 +2,8 @@
   hosts: localhost
   vars_files:
     - inventory/group_vars/shared.yml
+  become: yes
   tasks:
-    - community.docker.docker_compose:
-        docker_host: localhost:2375
-        project_src: flask
-        scale:
-          web: 2
-      register: output
     - name: Install Docker Module for Python
       pip:
         name: docker

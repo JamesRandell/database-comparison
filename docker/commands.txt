@@ -1,3 +1,6 @@
+# can run this inside the docker folder
+docker-compose up -d --force-recreate --build
+
 docker run -e DS_LICENSE=accept --name my-studio -p 9091:9091 -d datastax/dse-studio
 
 
