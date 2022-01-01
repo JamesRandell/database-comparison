@@ -1,0 +1,6 @@
+xpack.monitoring.enabled: "true"
+xpack.monitoring.elasticsearch.url: "http://localhost:9200"
+xpack.monitoring.elasticsearch.username: "username"
+xpack.monitoring.elasticsearch.password: "password"
+http.host: 0.0.0.0
+monitoring.elasticsearch.hosts: http://localhost:9200
