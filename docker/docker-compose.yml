@@ -91,14 +91,24 @@ services:
   kafka1:
     image: bitnami/kafka
     container_name: kafka1
-    restart: unless-stopped
+    #restart: unless-stopped
     ports:
-      - "9091:9092"
+      - "19092:9092"
     environment:
       KAFKA_CFG_ZOOKEEPER_CONNECT: "zookeeper1:2181"
       ALLOW_PLAINTEXT_LISTENER: "yes"
-      KAFKA_CFG_LISTENERS: "PLAINTEXT://:9091"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://127.0.0.1:9091"
+      KAFKA_CFG_LISTENERS:
+        "INTERNAL://:9090,\
+         EXTERNAL://kafka1:9092"
+      KAFKA_CFG_ADVERTISED_LISTENERS:
+        "INTERNAL://:9090,\
+         EXTERNAL://kafka1:9092"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP:
+        "INTERNAL:PLAINTEXT,\
+         EXTERNAL:PLAINTEXT"
+      KAFKA_CFG_ADVERTISED_HOST_NAME: "kafka1"
+      KAFKA_CFG_ADVERTISED_PORT: "9092"
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
     networks:
       - db-comparison-network
     depends_on:
@@ -109,14 +119,24 @@ services:
   kafka2:
     image: bitnami/kafka
     container_name: kafka2
-    restart: unless-stopped
+    #restart: unless-stopped
     ports:
-      - "9092:9092"
+      - "29092:9092"
     environment:
       KAFKA_CFG_ZOOKEEPER_CONNECT: "zookeeper2:2181"
       ALLOW_PLAINTEXT_LISTENER: "yes"
-      KAFKA_CFG_LISTENERS: "PLAINTEXT://:9092"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://127.0.0.1:9092"
+      KAFKA_CFG_LISTENERS:
+        "INTERNAL://:9090,\
+         EXTERNAL://kafka2:9092"
+      KAFKA_CFG_ADVERTISED_LISTENERS:
+        "INTERNAL://:9090,\
+         EXTERNAL://kafka2:9092"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP:
+        "INTERNAL:PLAINTEXT,\
+         EXTERNAL:PLAINTEXT"
+      KAFKA_CFG_ADVERTISED_HOST_NAME: "kafka2"
+      KAFKA_CFG_ADVERTISED_PORT: "9092"
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
     networks:
       - db-comparison-network
     depends_on:
@@ -127,14 +147,24 @@ services:
   kafka3:
     image: bitnami/kafka
     container_name: kafka3
-    restart: unless-stopped
+    #restart: unless-stopped
     ports:
-      - "9093:9092"
+      - "39092:9092"
     environment:
       KAFKA_CFG_ZOOKEEPER_CONNECT: "zookeeper3:2181"
       ALLOW_PLAINTEXT_LISTENER: "yes"
-      KAFKA_CFG_LISTENERS: "PLAINTEXT://:9093"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://127.0.0.1:9093"
+      KAFKA_CFG_LISTENERS:
+        "INTERNAL://:9090,\
+         EXTERNAL://kafka3:9092"
+      KAFKA_CFG_ADVERTISED_LISTENERS:
+        "INTERNAL://:9090,\
+         EXTERNAL://kafka3:9092"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP:
+        "INTERNAL:PLAINTEXT,\
+         EXTERNAL:PLAINTEXT"
+      KAFKA_CFG_ADVERTISED_HOST_NAME: "kafka3"
+      KAFKA_CFG_ADVERTISED_PORT: "9092"
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
     networks:
       - db-comparison-network
     depends_on:
@@ -151,11 +181,11 @@ services:
     networks:
       - db-comparison-network
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: "localhost:9091"
-      CONNECT_GROUP_ID: "quickstart-avro"
-      CONNECT_CONFIG_STORAGE_TOPIC: "quickstart-avro-config"
-      CONNECT_OFFSET_STORAGE_TOPIC: "quickstart-avro-offsets"
-      CONNECT_STATUS_STORAGE_TOPIC: "quickstart-avro-status"
+      CONNECT_BOOTSTRAP_SERVERS: "kafka1:9092"
+      CONNECT_GROUP_ID: "kafka-connct"
+      CONNECT_CONFIG_STORAGE_TOPIC: "connect-storage-config"
+      CONNECT_OFFSET_STORAGE_TOPIC: "connect-storage-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "connect-storage-status"
       CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
@@ -168,6 +198,10 @@ services:
       CONNECT_REST_ADVERTISED_HOST_NAME: "localhost"
       CONNECT_LOG4J_ROOT_LOGLEVEL: "DEBUG"
       CONNECT_PLUGIN_PATH: "/usr/share/java/"
+    depends_on:
+        - kafka1
+        - kafka2
+        - kafka3
     
   kafka-connect-ui:
     image: landoop/kafka-connect-ui
@@ -178,6 +212,28 @@ services:
       - db-comparison-network
     environment:
       CONNECT_URL: "http://0.0.0.0:8083,dev cluster"
+  
+  akhq:
+    image: tchiotludo/akhq:0.18.0
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            docker-kafka-server:
+              properties:
+                bootstrap.servers: 'kafka1:9092,kafka2:9092,kafka3:9092'
+              schema-registry:
+                url: 'http://schema-registry:8081'
+              connect:
+                - name: "connect"
+                  url: "http://kafka-connect:8083/"
+    ports:
+      - 8888:8080
+    depends_on:
+      - kafka-connect
+    networks:
+      - db-comparison-network
+
 volumes:
   zoo1_data:
   zoo2_data:
