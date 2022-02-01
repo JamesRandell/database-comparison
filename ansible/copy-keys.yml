@@ -1,0 +1,13 @@
+- name: Copy my REST API keys to each host
+  hosts: servers
+  become: yes
+  become_user: root
+  tasks:
+    - name: Create ssh folder
+      file:
+        path: ~/.ssh
+        state: directory
+    - name: Copy keys
+      copy:
+        src: "C:\\Users\\james\\Code\\Ivy-project-2020\\ivy-db\\module\\connection\\keys\\starbuck_rest_api_key.pub"
+        dest: "~/.ssh/starbuck_rest_api_key.pub"

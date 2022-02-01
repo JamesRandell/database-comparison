@@ -3,6 +3,12 @@
   become: yes
   become_user: root
   tasks:
+    - name: Open ports SSH
+      firewalld:
+        permanent: yes
+        port: 22/tcp
+        state: enabled
+        zone: public
     - name: Open ports
       firewalld:
         permanent: yes
