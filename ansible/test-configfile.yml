@@ -1,0 +1,13 @@
+- name: Test playbook to change config file options
+  hosts: localhost
+  tasks:
+  - name: Update CASSANDRA env (part 2)
+    lineinfile:
+      path: /mnt/c/Users/James/Code/Database Comparison/resource/config.yaml
+      regexp: "^#? *{{ item.key | regex_escape() }}="
+      line: "{{ item.key }}={{ item.value }}"
+      backup: no
+      state: absent
+    with_dict:
+      'MAX_HEAP_SIZE': ''
+      'HEAP_NEWSIZE': ''

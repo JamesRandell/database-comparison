@@ -6,51 +6,39 @@
     - name: Update CASSANDRA config
       lineinfile:
         path: /etc/cassandra/conf/cassandra.yaml
-        regexp: "{{ item.from }}"
-        line: "{{ item.to }}"
-        backup: yes
-      with_items:
-        #- { from: 'cluster\_name', to: "cluster_name: 'work'" }
-        - { from: 'listen_address:', to: "listen_address: {{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}" }
-        - { from: '- seeds:', to: "       - seeds: \"{{ hostvars[groups['servers'][0]].ansible_host }}\"" }
-        - { from: 'start_rpc:', to: 'start_rpc: true' }
-        
-        # allow JMX to connect
-        #- { from: 'rpc_address:', to: "rpc_address: {{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}" }
-        - { from: 'rpc_address:', to: "#rpc_address: {{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}" }
+        regexp: "{{ item.key | regex_escape() }}:"
+        line: "{{ item.key }}: {{ item.value }}"
+        backup: no
+      with_dict:
+        'listen_address': "{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}"
+        '- seeds': "{{ hostvars[groups['servers'][0]].ansible_host }}"
+        'start_rpc': 'start_rpc: true'
+        'rpc_address': "{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}"
       become: yes
       become_user: root
     - name: Update CASSANDRA env
       lineinfile:
-        #path: /etc/cassandra/conf/cassandra-env.sh
-        dest: /etc/cassandra/conf/cassandra-env.sh
+        path: /etc/cassandra/conf/cassandra-env.sh
         regexp: "{{ item.regexp }}"
         line: "{{ item.line }}"
-        #regexp: "{{ item.from }}"
-        #line: "{{ item.to }}"
-        #regexp: "{{ item.property | regex_escape() }}="
-        #line: "{{ item.property }}={{ item.value }}"
-        backup: yes
       with_items:
-        #- { from: 'MAX_HEAP_SIZE=', to: 'MAX_HEAP_SIZE="1500M"' }
-        #- { from: 'HEAP_NEWSIZE=', to: 'HEAP_NEWSIZE="300M"' }
-        - { regexp: '#MAX_HEAP_SIZE', line: 'MAX_HEAP_SIZE="1200M"' }
-        - { regexp: 'HEAP_NEWSIZE"300M"', line: 'HEAP_NEWSIZE="300M"' }
-        - { regexp: 'LOCAL_JMX=yes', line: 'LOCAL_JMX=no' }
-        #- { from: '    #LOCAL_JMX=yes', to: '    LOCAL_JMX=no' }
+        - { regexp: '^MAX_HEAP_SIZE', line: '#MAX_HEAP_SIZE' }
+        - { regexp: '^HEAP_NEWSIZE', line: '#HEAP_NEWSIZE' }
+        - { regexp: '^LOCAL_JMX=yes', line: 'LOCAL_JMX=no' }
       become: yes
       become_user: root
-    - name: Update CASSANDRA env (part 2)
-      lineinfile:
-        path: /etc/cassandra/conf/cassandra-env.sh
-        regexp: "^#? *{{ item.key | regex_escape() }}="
-        line: "{{ item.key }}={{ item.value }}"
-        backup: yes
-      with_dict:
-        'MAX_HEAP_SIZE': '"800M"'
-        'HEAP_NEWSIZE': '"200M"'
-      become: yes
-      become_user: root
+    
+    #- name: Update CASSANDRA env (part 2)
+    #  lineinfile:
+    #    path: /etc/cassandra/conf/cassandra-env.sh
+    #    regexp: "^#? *{{ item.key | regex_escape() }}="
+    #    line: "{{ item.key }}={{ item.value }}"
+    #    backup: yes
+    #  with_dict:
+    #    'MAX_HEAP_SIZE': '"800M"'
+    #    'HEAP_NEWSIZE': '"200M"'
+    #  become: yes
+    #  become_user: root
     - name: Copy authentication file over
       copy:
         src: ../template/cassandra/jmxremote.password

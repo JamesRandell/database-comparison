@@ -1,7 +1,7 @@
 Set-Content -Path "C:\Users\james\Code\Database Comparison\ansible\inventory\inventory.yml" -Value "[servers]"
 
 $output = get-vm | 
-Where-Object {$_.Name -like "CentOS*"} | 
+Where-Object {$_.Name -like "CentOS*" -and $_.State -eq 'Running'} |
 Select-Object -ExpandProperty Networkadapters | 
 Select-Object @{
     label='Servers';
