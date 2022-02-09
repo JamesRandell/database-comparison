@@ -3,11 +3,36 @@
   become: yes
   become_user: root
   tasks:
+    - name: Create rest API user
+      user:
+        name: 'starbuck'
+        password: 'starbuck'
+        shell: /bin/bash
+        state: present
+      become: true
     - name: Create ssh folder
       file:
         path: ~/.ssh
         state: directory
+      become: yes
+      become_user: starbuck
+    - name: Create file authorised_keys
+      file:
+        path: '~/.ssh/authorized_keys'
+        owner: 'starbuck'
+        group: 'starbuck'
+        state: touch
+      become: yes
+      become_user: starbuck
     - name: Copy keys
       copy:
-        src: "C:\\Users\\james\\Code\\Ivy-project-2020\\ivy-db\\module\\connection\\keys\\starbuck_rest_api_key.pub"
+        src: ../resource/ssh/starbuck_rest_api_key.pub
         dest: "~/.ssh/starbuck_rest_api_key.pub"
+      become: yes
+      become_user: starbuck
+    - name: Append to authorised_keys
+      blockinfile:
+        path: '~/.ssh/authorized_keys'
+        block: "{{ lookup('file', '../resource/ssh/starbuck_rest_api_key.pub') }}"
+      become: yes
+      become_user: starbuck
