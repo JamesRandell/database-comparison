@@ -8,10 +8,10 @@
         path: /etc/cassandra/conf/cassandra.yaml
         regexp: "{{ item.key | regex_escape() }}:"
         line: "{{ item.key }}: {{ item.value }}"
-        backup: no
+        backup: yes
       with_dict:
         'listen_address': "{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}"
-        '- seeds': "{{ hostvars[groups['servers'][0]].ansible_host }}"
+        '    - seeds': "{{ hostvars[groups['servers'][0]].ansible_host }}"
         'start_rpc': 'start_rpc: true'
         'rpc_address': "{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}"
       become: yes
@@ -21,6 +21,7 @@
         path: /etc/cassandra/conf/cassandra-env.sh
         regexp: "{{ item.regexp }}"
         line: "{{ item.line }}"
+        backup: yes
       with_items:
         - { regexp: '^MAX_HEAP_SIZE', line: '#MAX_HEAP_SIZE' }
         - { regexp: '^HEAP_NEWSIZE', line: '#HEAP_NEWSIZE' }
@@ -31,34 +32,7 @@
     #- name: Update CASSANDRA env (part 2)
     #  lineinfile:
     #    path: /etc/cassandra/conf/cassandra-env.sh
-    #    regexp: "^#? *{{ item.key | regex_escape() }}="
-    #    line: "{{ item.key }}={{ item.value }}"
-    #    backup: yes
-    #  with_dict:
-    #    'MAX_HEAP_SIZE': '"800M"'
-    #    'HEAP_NEWSIZE': '"200M"'
-    #  become: yes
-    #  become_user: root
-    - name: Copy authentication file over
-      copy:
-        src: ../template/cassandra/jmxremote.password
-        dest: /etc/cassandra/jmxremote.password
-        owner: cassandra
-        group: cassandra
-    #- name: Clear out old cluster data as we're changing the name
-    #  file:
-    #    path: /var/lib/cassandra/data
-    #    state: absent
-    #- name: Re-create data directory as user
-    #  file:
-    #    path: /var/lib/cassandra/data
-    #    state: directory
-    #    owner: cassandra
-    #    group: cassandra
-    - name: Enable firewalld
-      service:
-        name: firewalld
-        enabled: yes
+    #    regexp: "^#? *{{ item.key | regex_escape() }}="   
         state: started
     - name: Open ports
       firewalld:

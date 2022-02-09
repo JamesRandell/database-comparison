@@ -50,6 +50,10 @@ ansible-playbook build-vm.yml -i inventory/inventory.yml
 # this one will configure cassandra, so more of an application/service level update
 ansible-playbook build-cassandra.yml -i inventory/inventory.yml
 
+
+# SSH key stuff to install, along with a starbuck user
+ansible-playbook build-cassandra.yml -i inventory/copy-keys.yml
+
 # finally, this is cassandra specific, but we open ports
 # YOU DON'T NEED THIS: I stuffed this into build-cassandra
 # ansible-playbook open-ports.yml -i inventory/inventory.yml
