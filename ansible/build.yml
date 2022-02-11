@@ -1,0 +1,4 @@
+---
+- import_playbook: build-vm.yml
+- import_playbook: build-cassandra.yml
+- import_playbook: copy-keys.yml

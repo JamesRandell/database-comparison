@@ -13,7 +13,7 @@ $image = "C:\Users\Public\Documents\Hyper-V\VM images\CentOS-Stream-8-x86_64-202
 $vmswitch = "lab" # name of your local vswitch
 $port = "Network Adapter" # port on the VM
 $cpu =  2 # Number of CPUs
-$ram = 4GB # RAM of VM. Note this is not a string, not in quotation marks
+$ram = 6GB # RAM of VM. Note this is not a string, not in quotation marks
 $pathToDisk = "C:\Users\Public\Documents\Hyper-V\Virtual hard disks\" # Where you want the VM's virtual disk to reside
 $disk_size = 20GB # VM storage, again, not a string
 

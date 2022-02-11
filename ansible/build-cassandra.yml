@@ -7,12 +7,12 @@
       lineinfile:
         path: /etc/cassandra/conf/cassandra.yaml
         regexp: "{{ item.key | regex_escape() }}:"
-        line: "{{ item.key }}: {{ item.value }}"
+        line: '{{ item.key }}: "{{ item.value }}"'
         backup: yes
       with_dict:
         'listen_address': "{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}"
-        '    - seeds': "{{ hostvars[groups['servers'][0]].ansible_host }}"
-        'start_rpc': 'start_rpc: true'
+        '      - seeds': "{{ hostvars[groups['servers'][0]].ansible_host }}"
+        'start_rpc': "true"
         'rpc_address': "{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}"
       become: yes
       become_user: root
@@ -26,14 +26,10 @@
         - { regexp: '^MAX_HEAP_SIZE', line: '#MAX_HEAP_SIZE' }
         - { regexp: '^HEAP_NEWSIZE', line: '#HEAP_NEWSIZE' }
         - { regexp: '^LOCAL_JMX=yes', line: 'LOCAL_JMX=no' }
+        - { regexp: '#MAX_HEAP_SIZE', line: 'MAX_HEAP_SIZE="1600M"' }
+        - { regexp: '#HEAP_NEWSIZE', line: 'HEAP_NEWSIZE="250M"' }
       become: yes
       become_user: root
-    
-    #- name: Update CASSANDRA env (part 2)
-    #  lineinfile:
-    #    path: /etc/cassandra/conf/cassandra-env.sh
-    #    regexp: "^#? *{{ item.key | regex_escape() }}="   
-        state: started
     - name: Open ports
       firewalld:
         port: "{{ item }}"
